@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Include Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <title>Vue.js Task List</title>
+</head>
+<body>
+    <style>
+       .row{
+        margin-top: 20px;
+        display: grid;
+        align-items:center;
+       }
+        .completed {
+          text-decoration: line-through;
+          color: green; 
+        }
+        .incomplete {
+          color: red;
+        }
+      </style>
+  <div id="app" class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="text-center">Task List</h1>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 col-12">
+        <!-- Task Creation -->
+        <div class="form-group">
+          <input v-model="newTask" @input="clearError" class="form-control" placeholder="Enter a new task" />
+        </div>
+        <div class="form-group">
+          <button @click="addTask" class="btn btn-primary">Add Task</button>
+        </div>
+        <div v-if="error" class="alert alert-danger">{{ error }}</div>
+      </div>
+
+      <div class="col-md-6 col-12">
+        <!-- Task Filtering -->
+        <label class="mr-2"></label>
+        <select v-model="filter" class="form-control">
+          <option value="all">All</option>
+          <option value="completed">Completed</option>
+          <option value="incomplete">Incomplete</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <!-- Task List -->
+        <ul class="list-group ul-list">
+            <li v-for="task in filteredTasks" :key="task.id" class="list-group-item d-flex justify-content-between">
+              <span :class="[task.completed ? 'completed' : 'incomplete']">{{ task.title }}</span>
+              <button @click="deleteTask(task.id)" class="btn btn-danger">Delete</button>
+              <button @click="toggleCompletion(task.id)" class="btn btn-success">
+                {{ task.completed ? 'Mark Incomplete' : 'Mark Complete' }}
+              </button>
+            </li>
+          </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        tasks: [
+          { id: 1, title: 'Task 1', completed: false },
+          { id: 2, title: 'Task 2', completed: true },
+        ],
+        newTask: '',
+        filter: 'all',
+        error: '',
+      },
+      methods: {
+        clearError() {
+          this.error = '';
+        },
+        addTask() {
+          if (this.newTask.trim() === '') {
+            this.error = 'Task title cannot be empty.';
+            return;
+          }
+
+          const newTask = {
+            id: this.tasks.length + 1,
+            title: this.newTask,
+            completed: false,
+          };
+
+          this.tasks.push(newTask);
+          this.newTask = '';
+        },
+        deleteTask(taskId) {
+          const index = this.tasks.findIndex(task => task.id === taskId);
+          if (index !== -1) {
+            this.tasks.splice(index, 1);
+          }
+        },
+        toggleCompletion(taskId) {
+          const task = this.tasks.find(task => task.id === taskId);
+          if (task) {
+            task.completed = !task.completed;
+          }
+        },
+      },
+      computed: {
+        filteredTasks() {
+          if (this.filter === 'completed') {
+            return this.tasks.filter(task => task.completed);
+          } else if (this.filter === 'incomplete') {
+            return this.tasks.filter(task => !task.completed);
+          } else {
+            return this.tasks;
+          }
+        },
+      },
+    });
+  </script>
+</body>
+</html>
